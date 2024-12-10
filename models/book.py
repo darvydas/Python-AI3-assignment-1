@@ -4,7 +4,7 @@ class Book:
         self.author = author
         self.publication_year = publication_year
         self.genre = genre
-        self.available = 0
+        self.available = 1
 
     def __str__(self):
         return f"Title: {self.title}\nAuthor: {self.author}\nPublication Year: {self.publication_year}\nGenre: {self.genre}\nAvailable: {self.available}"
