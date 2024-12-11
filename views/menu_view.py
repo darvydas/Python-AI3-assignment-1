@@ -8,4 +8,6 @@ def display_menu():
     print("5. Borrow book")
     print("6. Return book")
     print("7. View overdue books")
-    print("8. Exit")
+    print("8. View borrowed books")
+    print("9. Exit")
+    print("10. Add dummy data")
