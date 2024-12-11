@@ -64,7 +64,6 @@ class LendingService:
   #       if borrow_info['due_date'] < today:
   #         overdue_books.append(book)
   #   return overdue_books
-  #   return filter(lambda x: x for book, borrow_info_list in x, self.borrowed_books.items())
 
   def get_overdue_books(self):
     """Returns a list of overdue books."""
@@ -103,8 +102,12 @@ class LendingService:
   def get_reader_overdue_books(self, reader: Reader):
     """ Checks if a reader has any overdue books and returns a list of overdue books. """
     overdue_books = self.get_overdue_books()
-    reader_overdue_books = []
-    for book in overdue_books: # TODO: linear search might take too long on long lists
-      if book in reader.borrowed_books:
-        reader_overdue_books.append(book)
+
+    # reader_overdue_books = []
+    # for book in overdue_books: # TODO: linear search might take too long on long lists
+    #   if book in reader.borrowed_books:
+    #     reader_overdue_books.append(book)
+
+    reader_overdue_books = list(filter(lambda book: book in reader.borrowed_books, overdue_books))
+    print(reader_overdue_books)
     return reader_overdue_books if reader_overdue_books else None

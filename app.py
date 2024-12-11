@@ -87,8 +87,8 @@ def main():
       reader:Reader = lending_service.get_or_create_reader(reader_id)
       if lending_service.check_overdue_status(reader):
         print(f"Reader {reader.name} has overdue books and cannot borrow more.")
-        # TODO: print overdue books?
-        # lending_service.get_reader_overdue_books()
+        overdue_books = lending_service.get_reader_overdue_books(reader)
+        library_view.display_overdue_books(overdue_books)
         continue  # Move back to the menu
 
       book = get_book_by_title(library_service)
