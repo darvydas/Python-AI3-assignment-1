@@ -3,8 +3,10 @@
 from models.reader import Reader
 from services.library_service import LibraryService
 from services.lending_service import LendingService
+from services.pickle_service import save_to_pickle, load_from_pickle
 from views import library_view, menu_view
 import datetime
+import constants as const
 
 def get_publication_year():
   """Prompts the user for a publication year until a valid integer is entered."""
@@ -30,6 +32,8 @@ def insert_new_book():
 def main():
   library_service = LibraryService()
   lending_service = LendingService()
+
+  load_from_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service)
 
   while True:
 
@@ -112,6 +116,7 @@ def main():
         library_view.display_borrowed_books(borrowed_books)  # Use the view function
 
     elif choice == '9':
+        save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service) #TODO: could save on every data change
         print("Exiting Library Management System.")
         break
 
