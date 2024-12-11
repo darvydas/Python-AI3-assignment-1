@@ -89,7 +89,7 @@ class LendingService:
     # borrowed_books.sort(key=lambda x: x.due_date)
     # return borrowed_books
     # print( list(sorted(self.borrowed_books.items(), key=lambda item: item[1][0]['due_date'])) )
-    return dict(sorted(self.borrowed_books.items(), key=lambda item: item[1][0]['due_date']))
+    return dict(sorted(self.borrowed_books.items(), key=lambda item: item[1][0]['due_date'])) #TODO: could sort by all reader due_date first
 
   def check_overdue_status(self, reader:Reader):
       overdue_books = self.get_overdue_books()
@@ -103,11 +103,11 @@ class LendingService:
     """ Checks if a reader has any overdue books and returns a list of overdue books. """
     overdue_books = self.get_overdue_books()
 
-    # reader_overdue_books = []
-    # for book in overdue_books: # TODO: linear search might take too long on long lists
-    #   if book in reader.borrowed_books:
-    #     reader_overdue_books.append(book)
-
-    reader_overdue_books = list(filter(lambda book: book in reader.borrowed_books, overdue_books))
-    print(reader_overdue_books)
+    reader_overdue_books = {}
+    for book, borrow_info_list in overdue_books.items():
+      if book in reader.borrowed_books:
+        reader_overdue_books[book] = []
+        for borrow_info in borrow_info_list:
+          if borrow_info['reader_id'] == reader.id:
+            reader_overdue_books[book].append(borrow_info)
     return reader_overdue_books if reader_overdue_books else None

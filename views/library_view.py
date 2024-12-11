@@ -28,16 +28,17 @@ def display_search_results(results):
 def display_overdue_books(overdue_books):
   """Displays details of overdue books."""
   if overdue_books:
-    print("Overdue books:")
-    for book in overdue_books:
-      display_book(book)
+    print("\nOverdue books:")
+    for book, borrow_info_list in overdue_books.items():
+      for borrow_info in borrow_info_list:
+        display_book(book, borrow_info['due_date'], borrow_info['reader_id'])
   else:
     print("No overdue books.")
 
 def display_borrowed_books (borrowed_books):
   """Displays details of borrowed books."""
   if borrowed_books:
-    print("Borrowed books:")
+    print("\nBorrowed books:")
     # for book in borrowed_books:
     #   display_book(book)
     for book, borrow_info_list in borrowed_books.items():
