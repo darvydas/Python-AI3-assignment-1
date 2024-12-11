@@ -10,7 +10,8 @@ def save_to_pickle(filename, library_service, lending_service):
 
   data = {
     'books': library_service.books,
-    'borrowed_books': lending_service.borrowed_books
+    'borrowed_books': lending_service.borrowed_books,
+    'readers': lending_service.readers,
   }
 
   with open(filename, 'wb') as file:
@@ -25,6 +26,7 @@ def load_from_pickle(filename, library_service, lending_service):
               data = pickle.load(file)
           library_service.books = data['books']
           lending_service.borrowed_books = data['borrowed_books']
+          lending_service.readers = data['readers']
           # ... load other data ...
           print(f"Data loaded from {filename}")
       except (EOFError, pickle.UnpicklingError):  # Handle potential errors during loading

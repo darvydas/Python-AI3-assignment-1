@@ -6,6 +6,23 @@ from models.reader import Reader
 class LendingService:
   def __init__(self):
     self.borrowed_books = {}  # Dictionary to store borrowed books
+    self.readers = {}  # Dictionary to store readers by their ID
+
+  def get_or_create_reader(self, reader_id, reader_name="Unknown"):
+    """
+    Gets an existing reader or creates a new one if not found.
+    Returns: A Reader object.
+    """
+    if reader_id not in self.readers:
+      self.readers[reader_id] = Reader(reader_name, reader_id)
+    return self.readers[reader_id]
+
+  def get_reader(self, reader_id):
+    """
+    Gets the Reader object with the given reader_id.
+    Returns: Reader object if found, None otherwise.
+    """
+    return self.readers.get(reader_id)
 
   def borrow_book(self, reader:Reader, book:Book, due_date):
     if book.available > 0:
@@ -20,31 +37,24 @@ class LendingService:
         self.borrowed_books[book] = []
       self.borrowed_books[book].append({'due_date': due_date, 'reader_id': reader.id})
 
-      print (self.borrowed_books)
-
       return True # Book is borrowed
     else:
       return False # Book is unavailable
 
   def return_book(self, reader:Reader, book:Book):
-    print(reader)
-    print(book)
-    print(reader.borrowed_books)
     if book in reader.borrowed_books:
-        book.available += 1
-        reader.borrowed_books.remove(book)
+      book.available += 1
+      reader.borrowed_books.remove(book)
 
-        # Remove the book from borrowed_books
-        if book in self.borrowed_books:
-          self.borrowed_books[book] = [
-            borrow_info for borrow_info in self.borrowed_books[book] if borrow_info['reader_id'] != reader.id
-          ]
-          if not self.borrowed_books[book]:
-            del self.borrowed_books[book]
+      # Remove the book from borrowed_books
+      if book in self.borrowed_books:
+        self.borrowed_books[book] = [
+          borrow_info for borrow_info in self.borrowed_books[book] if borrow_info['reader_id'] != reader.id
+        ]
+        if not self.borrowed_books[book]:
+          del self.borrowed_books[book]
 
-        print(f"{reader.name} has returned '{book.title}'.")
-    else:
-        print(f"{reader.name} has not borrowed '{book.title}'.")
+        return book
 
   # def get_overdue_books(self):
   #   overdue_books = []
@@ -64,7 +74,6 @@ class LendingService:
       for book, borrow_info_list in self.borrowed_books.items() \
       if any(borrow_info['due_date'] < today for borrow_info in borrow_info_list)
     }
-    print (overdue_books)
     return overdue_books
 
   def get_borrowed_books(self):
@@ -87,15 +96,15 @@ class LendingService:
       overdue_books = self.get_overdue_books()
       for book in overdue_books:
           if book in reader.borrowed_books:
-              print(f"WARNING: '{book.title}' is overdue!")
-              return book
-      return None
+              # print(f"WARNING: '{book.title}' is overdue!")
+              return True
+      return False
 
   def get_reader_overdue_books(self, reader: Reader):
     """ Checks if a reader has any overdue books and returns a list of overdue books. """
     overdue_books = self.get_overdue_books()
     reader_overdue_books = []
-    for book in overdue_books:
+    for book in overdue_books: # TODO: linear search might take too long on long lists
       if book in reader.borrowed_books:
         reader_overdue_books.append(book)
     return reader_overdue_books if reader_overdue_books else None

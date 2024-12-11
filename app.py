@@ -28,6 +28,25 @@ def insert_new_book():
 
   return title, author, publication_year, genre  # Return all inputs
 
+def get_book_by_title(library_service:LibraryService): #TODO: might result in infinite loop if book name is not known
+  """Gets a book by title from user input."""
+  while True:
+    title = input("Enter title of book: ")
+    book = library_service.get_book_by_title(title)
+    if book:
+      return book
+    else:
+      print("Book not found. Please try again.")
+
+def get_due_date():
+  """Gets a due date from user input."""
+  while True:
+    try:
+      due_date_str = input("Enter due date (YYYY-MM-DD): ")
+      due_date = datetime.datetime.strptime(due_date_str, "%Y-%m-%d").date()
+      return due_date
+    except ValueError:
+      print("Invalid date format. Please use YYYY-MM-DD.")
 
 def main():
   library_service = LibraryService()
@@ -65,80 +84,76 @@ def main():
 
     elif choice == '5':
       reader_id = input("Enter reader ID: ")
-      # TODO: should not create new reader object, check if already exists
-      reader = Reader("Unknown", reader_id)  # Assuming reader name is not important for borrowing
-      title = input("Enter title of book to borrow: ")
-      book = library_service.get_book_by_title(title)
-      if book:
-        try:
-          due_date_str = input("Enter due date (YYYY-MM-DD): ")
-          due_date = datetime.datetime.strptime(due_date_str, "%Y-%m-%d").date()
-          # match lending_service.borrow_book(reader, book, due_date):
-          #   case True:
-          #     pass
-          #   case None:
-          #     pass
-          #   case False:
-          #     pass
-          if not lending_service.check_overdue_status(reader):
-            if lending_service.borrow_book(reader, book, due_date):
-              print(f"{reader.name} has borrowed '{book.title}'. Due date: {due_date.strftime('%Y-%m-%d')}") # TODO: move print to views
-            else:
-              print(f"'{book.title}' is currently unavailable.")
-          else:
-            print(f"Reader {reader.name} has overdue books and cannot borrow more.")
-            # TODO: print overdue books?
-            # lending_service.get_reader_overdue_books()
-        except ValueError:
-          print("Invalid date format. Please use YYYY-MM-DD.")
-      else:
-        print("Book not found.")
+      reader:Reader = lending_service.get_or_create_reader(reader_id)
+      if lending_service.check_overdue_status(reader):
+        print(f"Reader {reader.name} has overdue books and cannot borrow more.")
+        # TODO: print overdue books?
+        # lending_service.get_reader_overdue_books()
+        continue  # Move back to the menu
+
+      book = get_book_by_title(library_service)
+      if not book.available > 0:
+        print(f"Book {book.title} is out of stock.")
+        continue
+
+      due_date = get_due_date()
+
+      lending_service.borrow_book(reader, book, due_date)
+      print(f"{reader.name} has borrowed '{book.title}'. Due date: {due_date.strftime('%Y-%m-%d')}")
 
     elif choice == '6':
-        reader_id = input("Enter reader ID: ")
-        # reader = Reader("Unknown", reader_id)
-        # TODO: check if reader_id is valid
+      reader_id = input("Enter reader ID: ")
+      if not reader_id.isalnum():
+        print('Ivalid reader ID.')
+        continue
 
-        title = input("Enter title of book to return: ")
-        book = library_service.get_book_by_title(title)
+      reader = lending_service.get_reader(reader_id)  # Get the reader, if exists
+
+      if reader:  # Check if the reader exists
+        book = get_book_by_title(library_service)
         if book:
-            lending_service.return_book(reader, book)
+          if lending_service.return_book(reader, book):
+            print(f"{reader.name} has returned '{book.title}'.")
+          else:
+            print(f"{reader.name} has not borrowed '{book.title}'.")
         else:
-            print("Book not found.")
+          print("Book not found.")
+      else:
+        print("Invalid reader ID.")
 
     elif choice == '7':
-        overdue_books = lending_service.get_overdue_books()
-        library_view.display_overdue_books(overdue_books)  # Use the view function
-        # TODO: should print overdue date
+      overdue_books = lending_service.get_overdue_books()
+      library_view.display_overdue_books(overdue_books)  # Use the view function
+      # TODO: should print overdue date
 
     elif choice == '8':
-        borrowed_books = lending_service.get_borrowed_books()
-        library_view.display_borrowed_books(borrowed_books)  # Use the view function
+      borrowed_books = lending_service.get_borrowed_books()
+      library_view.display_borrowed_books(borrowed_books)  # Use the view function
 
     elif choice == '9':
-        save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service) #TODO: could save on every data change
-        print("Exiting Library Management System.")
-        break
+      save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service) #TODO: could save on every data change
+      print("Exiting Library Management System.")
+      break
 
     elif choice == '10':
-        library_service.add_book('Untouched book', 'Mr. B', 2000, 'Fiction')
-        library_service.add_book('Banana book', 'Mr. B', 2000, 'Fiction') # borrowed and not due
-        library_service.add_book('Banana book2', 'Mr. B', 2010, 'Fiction') # borrowed and overdue
-        library_service.add_book('Banana book3', 'Mr. B', 2010, 'Fiction') # not borrowed because overdue
+      library_service.add_book('Untouched book', 'Mr. B', 2000, 'Fiction')
+      library_service.add_book('Banana book', 'Mr. B', 2000, 'Fiction') # borrowed and not due
+      library_service.add_book('Banana book2', 'Mr. B', 2010, 'Fiction') # borrowed and overdue
+      library_service.add_book('Banana book3', 'Mr. B', 2010, 'Fiction') # not borrowed because overdue
 
-        reader = Reader("Dummy data", 'dreader')
-        book = library_service.get_book_by_title('Banana book')
-        lending_service.borrow_book(reader, book, datetime.datetime.strptime('2025-01-01', "%Y-%m-%d").date()) # not due
+      reader = lending_service.get_or_create_reader('dreader',"Dummy data")
+      book = library_service.get_book_by_title('Banana book')
+      lending_service.borrow_book(reader, book, datetime.datetime.strptime('2025-01-01', "%Y-%m-%d").date()) # not due
 
-        book = library_service.get_book_by_title('Banana book2')
-        lending_service.borrow_book(reader, book, datetime.datetime.strptime('2024-12-01', "%Y-%m-%d").date()) # overdue
+      book = library_service.get_book_by_title('Banana book2')
+      lending_service.borrow_book(reader, book, datetime.datetime.strptime('2024-12-01', "%Y-%m-%d").date()) # overdue
 
-        book = library_service.get_book_by_title('Banana book3')
-        lending_service.borrow_book(reader, book, datetime.datetime.strptime('2025-01-01', "%Y-%m-%d").date()) # not due
+      book = library_service.get_book_by_title('Banana book3')
+      lending_service.borrow_book(reader, book, datetime.datetime.strptime('2025-01-01', "%Y-%m-%d").date()) # not due
 
 
     else:
-        print("Invalid choice. Please try again.")
+      print("Invalid choice. Please try again.")
 
 if __name__ == "__main__":
   main()
