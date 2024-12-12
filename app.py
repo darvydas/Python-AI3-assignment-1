@@ -12,7 +12,7 @@ def input_publication_year():
   """Prompts the user for a publication year until a valid integer is entered."""
   while True:
     try:
-      publication_year = int(input("Enter publication year (YYYY): "))
+      publication_year = int(input("Enter publication year (YYYY): ").strip())
       if 0 < publication_year < datetime.date.today().year:
         return publication_year  # Return the valid year
       menu_view.display_error_msg(f"Invalid publication year. Please enter a number from 0 to {datetime.date.today().year}.")
@@ -21,17 +21,17 @@ def input_publication_year():
 
 def insert_new_book():
   """Gets book details from the user."""
-  title = input("Enter title: ")
-  author = input("Enter author: ")
+  title = input("Enter title: ").strip()
+  author = input("Enter author: ").strip()
   publication_year = input_publication_year()  # Call the function to get the year
-  genre = input("Enter genre: ")
+  genre = input("Enter genre: ").strip()
 
   return title, author, publication_year, genre  # Return all inputs
 
 def get_book_by_title_input(library_service:LibraryService): #TODO: might result in infinite loop if book name is not known
   """Gets a book by title from user input."""
   while True:
-    title = input("Enter title of book: ")
+    title = input("Enter title of book: ").strip()
     book = library_service.get_book_by_title(title)
     if not book:
       menu_view.display_error_msg("Book not found. Please try again.")
@@ -43,7 +43,7 @@ def input_due_date():
   """Gets a due date from user input."""
   while True:
     try:
-      due_date_str = input("Enter due date (YYYY-MM-DD): ")
+      due_date_str = input("Enter due date (YYYY-MM-DD): ").strip()
       due_date = datetime.datetime.strptime(due_date_str, "%Y-%m-%d").date()
       return due_date
     except ValueError:
@@ -63,16 +63,18 @@ def main():
 
     menu_view.display_menu()
 
-    choice = input("Enter your choice: ")
+    choice = input("Enter your choice: ").strip()
 
     if choice == '1':
       title, author, publication_year, genre = insert_new_book()
+      if not all([title, author, publication_year, genre]):
+        menu_view.display_error_msg("Book fields are were left empty. Please try again.")
 
-      book = library_service.add_book(title, author, publication_year, genre)
-      menu_view.display_success_msg(f"Book '{book.title}' added successfully!") # TODO: notify user if it was already there?
+        book = library_service.add_book(title, author, publication_year, genre)
+        menu_view.display_success_msg(f"Book '{book.title}' added successfully!") # TODO: notify user if it was already there?
 
     elif choice == '2': # TODO: could remove by year or select a book from list
-      title = input("Enter title of book to remove: ")
+      title = input("Enter title of book to remove: ").strip()
       removed_book = library_service.remove_book(title)
       if removed_book:
         menu_view.display_success_msg(f"Book \"{removed_book.title}\" by {removed_book.author} removed from library!")
@@ -80,7 +82,7 @@ def main():
         menu_view.display_error_msg("Book not found.")
 
     elif choice == '3':
-      query = input("Enter title or author to search: ")
+      query = input("Enter title or author to search: ").strip()
       results = library_service.find_book_by_title_or_author(query)
       library_view.display_search_results(results)
 
@@ -88,7 +90,7 @@ def main():
       library_view.display_all_books(library_service.books)
 
     elif choice == '5':
-      reader_id = input("Enter reader ID: ")
+      reader_id = input("Enter reader ID: ").strip()
       reader:Reader = lending_service.get_or_create_reader(reader_id)
       if lending_service.check_overdue_status(reader):
         menu_view.display_error_msg(f"Reader {reader.name} has overdue books and cannot borrow more.")
@@ -109,7 +111,7 @@ def main():
         menu_view.display_error_msg(f"Book {book.title} is unavailable.")
 
     elif choice == '6':
-      reader_id = input("Enter reader ID: ")
+      reader_id = input("Enter reader ID: ").strip()
 
       if not reader_id.isalnum():
         menu_view.display_error_msg(f'Ivalid reader ID: {reader_id}. Please use numbers and letters only.')
