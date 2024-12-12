@@ -16,7 +16,7 @@ class LibraryService:
     self.books.append(book)
     return book
 
-  def remove_book(self, title):
+  def remove_book(self, title): # TODO: books might also be in LendingService.borrowed_books reader.borrowed_books
     for book in self.books:
       if book.title == title:
         self.books.remove(book)
