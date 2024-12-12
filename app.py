@@ -3,6 +3,7 @@
 from models.reader import Reader
 from services.library_service import LibraryService
 from services.lending_service import LendingService
+from services.reader_service import ReaderService
 from services.pickle_service import save_to_pickle, load_from_pickle
 from views import library_view, menu_view, system_view
 import datetime
@@ -56,8 +57,9 @@ def input_due_date():
 def main():
   library_service = LibraryService()
   lending_service = LendingService()
+  reader_service = ReaderService()
 
-  file_load = load_from_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service)
+  file_load = load_from_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service)
   if file_load is True:
     system_view.display_system_msg(f"Data loaded from {const.LIBRARY_DATA_FILENAME}")
   else:
@@ -104,7 +106,7 @@ def main():
           menu_view.display_error_msg("Reader ID empty is not valid.")
           continue
 
-        reader:Reader = lending_service.get_or_create_reader(reader_id)
+        reader:Reader = reader_service.get_or_create_reader(reader_id)
         if lending_service.check_overdue_status(reader):
           menu_view.display_error_msg(f"Reader {reader.name} has overdue books and cannot borrow more.")
           overdue_books = lending_service.get_reader_overdue_books(reader)
@@ -132,7 +134,7 @@ def main():
           menu_view.display_error_msg(f'Ivalid reader ID: \'{reader_id}\'. Please use numbers and letters only.')
           continue
 
-        reader = lending_service.get_reader(reader_id)  # Get the reader, if exists
+        reader = reader_service.get_reader(reader_id)  # Get the reader, if exists
 
         if not reader:  # Check if the reader exists
           menu_view.display_error_msg(f'There is no reader with ID: {reader_id}.')
@@ -155,7 +157,7 @@ def main():
         library_view.display_borrowed_books(borrowed_books)  # Use the view function
 
       elif choice == '9':
-        file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service)
+        file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service)
         if file_save is True:
           system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
         else:
@@ -170,7 +172,7 @@ def main():
         library_service.add_book('Banana book2', 'Mr. B', 2010, 'Fiction') # borrowed and overdue
         library_service.add_book('Banana book3', 'Mr. B', 2010, 'Fiction') # not borrowed because overdue
 
-        reader = lending_service.get_or_create_reader('dreader',"Dummy data")
+        reader = reader_service.get_or_create_reader('dreader',"Dummy data")
         book = library_service.get_book_by_title('Banana book')
         lending_service.borrow_book(reader, book, datetime.datetime.strptime('2025-01-01', "%Y-%m-%d").date()) # not due
 
@@ -185,7 +187,7 @@ def main():
         menu_view.display_error_msg("Invalid menu choice. Please try again.")
 
       # save to file on ever menu finish
-      file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service)
+      file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service)
       if file_save is True:
         system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
       else:
