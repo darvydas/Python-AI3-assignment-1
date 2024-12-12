@@ -155,7 +155,7 @@ def main():
       library_view.display_borrowed_books(borrowed_books)  # Use the view function
 
     elif choice == '9':
-      file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service) #TODO: could save on every data change
+      file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service)
       if file_save is True:
         system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
       else:
@@ -183,6 +183,13 @@ def main():
 
     else:
       menu_view.display_error_msg("Invalid menu choice. Please try again.")
+
+    # save to file on ever menu finish
+    file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service)
+    if file_save is True:
+      system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
+    else:
+      system_view.display_system_msg(f"Error: {file_save}")
 
 if __name__ == "__main__":
   main()
