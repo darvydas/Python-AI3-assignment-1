@@ -68,8 +68,8 @@ def main():
     if choice == '1':
       title, author, publication_year, genre = insert_new_book()
 
-      library_service.add_book(title, author, publication_year, genre) # TODO: should return added book
-      menu_view.display_success_msg("Book added successfully!")
+      book = library_service.add_book(title, author, publication_year, genre)
+      menu_view.display_success_msg(f"Book '{book.title}' added successfully!") # TODO: notify user if it was already there?
 
     elif choice == '2': # TODO: could remove by year or select a book from list
       title = input("Enter title of book to remove: ")
