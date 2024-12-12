@@ -18,5 +18,3 @@ def display_success_msg(msg):
 def display_error_msg(msg):
   print(f"\nError: {msg}")
 
-def display_system_msg(msg):
-  print(f"\nSystem: {msg}")

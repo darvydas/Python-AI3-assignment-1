@@ -4,7 +4,7 @@ from models.reader import Reader
 from services.library_service import LibraryService
 from services.lending_service import LendingService
 from services.pickle_service import save_to_pickle, load_from_pickle
-from views import library_view, menu_view
+from views import library_view, menu_view, system_view
 import datetime
 import constants as const
 
@@ -53,7 +53,11 @@ def main():
   library_service = LibraryService()
   lending_service = LendingService()
 
-  load_from_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service)
+  file_load = load_from_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service)
+  if file_load is True:
+    system_view.display_system_msg(f"Data loaded from {const.LIBRARY_DATA_FILENAME}")
+  else:
+    system_view.display_system_msg(f"Error: {file_load}")
 
   while True:
 
@@ -134,8 +138,13 @@ def main():
       library_view.display_borrowed_books(borrowed_books)  # Use the view function
 
     elif choice == '9':
-      save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service) #TODO: could save on every data change
-      menu_view.display_system_msg("Exiting Library Management System.")
+      file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service) #TODO: could save on every data change
+      if file_save is True:
+        system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
+      else:
+        system_view.display_system_msg(f"Error: {file_save}")
+
+      system_view.display_system_msg("\nExiting Library Management System.")
       break
 
     elif choice == '10':
