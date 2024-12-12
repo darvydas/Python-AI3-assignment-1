@@ -5,9 +5,16 @@ class LibraryService:
     self.books:list[Book] = []
 
   def add_book(self, title, author, publication_year, genre):
-    # TODO: should check if book is already in list and increase book.available count
+    """Adds a new book or increases the available count if it already exists."""
+    for book in self.books:
+      if book.title == title and book.author == author and book.publication_year == publication_year:
+        book.increase_available()
+        return book
+
+    # If the book is not found, create a new one
     book = Book(title, author, publication_year, genre)
     self.books.append(book)
+    return book
 
   def remove_book(self, title):
     for book in self.books:
