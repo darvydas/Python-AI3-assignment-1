@@ -28,14 +28,18 @@ def insert_new_book():
 
   return title, author, publication_year, genre  # Return all inputs
 
-def get_book_by_title_input(library_service:LibraryService): #TODO: might result in infinite loop if book name is not known
+def get_book_by_title_input(library_service:LibraryService):
   """Gets a book by title from user input."""
   while True:
     title = input("Enter title of book: ").strip()
     book = library_service.get_book_by_title(title)
     if not book:
-      menu_view.display_error_msg("Book not found. Please try again.")
-      # TODO: ask to leave input? or skip if failed?
+      menu_view.display_error_msg("Book not found.")
+
+      yes_no = input("Do you want to enter another one? (yes / y): ").strip()
+      if yes_no not in ['yes','y']:
+        break
+
       continue
     return book
 
@@ -108,6 +112,8 @@ def main():
         continue  # Move back to the menu
 
       book = get_book_by_title_input(library_service)
+      if not book:
+        continue
       if not book.is_available():
         menu_view.display_error_msg(f"Book {book.title} is out of stock.")
         continue
@@ -132,8 +138,8 @@ def main():
         menu_view.display_error_msg(f'There is no reader with ID: {reader_id}.')
 
       book = get_book_by_title_input(library_service)
-      # if not book: # this is already done on get_book_by_title_input
-      #   print("Book not found.")
+      if not book:
+        continue
 
       if lending_service.return_book(reader, book):
         menu_view.display_success_msg(f"{reader.name} has returned '{book.title}'.")
