@@ -97,7 +97,7 @@ def main():
         continue  # Move back to the menu
 
       book = get_book_by_title_input(library_service)
-      if not book.available > 0:
+      if not book.is_available():
         menu_view.display_error_msg(f"Book {book.title} is out of stock.")
         continue
 

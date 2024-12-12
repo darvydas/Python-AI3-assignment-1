@@ -25,11 +25,11 @@ class LendingService:
     return self.readers.get(reader_id)
 
   def borrow_book(self, reader:Reader, book:Book, due_date):
-    if book.available > 0:
+    if book.is_available():
       if self.check_overdue_status(reader):
         return None # reader has books due
 
-      book.available -= 1
+      book.decrease_available()
       reader.borrowed_books.append(book)
 
       # Store book title, due date, and reader ID
@@ -43,7 +43,7 @@ class LendingService:
 
   def return_book(self, reader:Reader, book:Book):
     if book in reader.borrowed_books:
-      book.available += 1
+      book.increase_available()
       reader.borrowed_books.remove(book)
 
       # Remove the book from borrowed_books

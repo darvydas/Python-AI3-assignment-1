@@ -4,9 +4,9 @@ from models.book import Book
 def display_book(book:Book, due_date = None, reader_id = ''):
   """Displays details of a single book."""
   if reader_id and due_date:
-    print(f"| {reader_id:<10} | {str(due_date):<10} | {book.title:<30} | {book.author:<20} | {book.publication_year:<5} | {book.genre:<15} | {book.available:<5} | ")
+    print(f"| {reader_id:<10} | {str(due_date):<10} | {book.title:<30} | {book.author:<20} | {book.publication_year:<5} | {book.genre:<15} | {book._available:<5} | ")
   else:
-    print(f"| {book.title:<30} | {book.author:<20} | {book.publication_year:<5} | {book.genre:<15} | {book.available:<5} |")
+    print(f"| {book.title:<30} | {book.author:<20} | {book.publication_year:<5} | {book.genre:<15} | {book._available:<5} |")
 
 def display_all_books(books):
   """Displays details of all books in the library."""
