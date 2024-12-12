@@ -75,6 +75,10 @@ def main():
 
     elif choice == '2': # TODO: could remove by year or select a book from list
       title = input("Enter title of book to remove: ").strip()
+      if not title:
+        menu_view.display_error_msg("Uable to remove book without a name.")
+        continue
+
       removed_book = library_service.remove_book(title)
       if removed_book:
         menu_view.display_success_msg(f"Book \"{removed_book.title}\" by {removed_book.author} removed from library!")
@@ -82,7 +86,7 @@ def main():
         menu_view.display_error_msg("Book not found.")
 
     elif choice == '3':
-      query = input("Enter title or author to search: ").strip()
+      query = input("Enter title or author to search: ").strip() # if search is empty -> look for all books
       results = library_service.find_book_by_title_or_author(query)
       library_view.display_search_results(results)
 
@@ -91,6 +95,10 @@ def main():
 
     elif choice == '5':
       reader_id = input("Enter reader ID: ").strip()
+      if not reader_id:
+        menu_view.display_error_msg("Reader ID empty is not valid.")
+        continue
+
       reader:Reader = lending_service.get_or_create_reader(reader_id)
       if lending_service.check_overdue_status(reader):
         menu_view.display_error_msg(f"Reader {reader.name} has overdue books and cannot borrow more.")
@@ -113,8 +121,8 @@ def main():
     elif choice == '6':
       reader_id = input("Enter reader ID: ").strip()
 
-      if not reader_id.isalnum():
-        menu_view.display_error_msg(f'Ivalid reader ID: {reader_id}. Please use numbers and letters only.')
+      if not reader_id or not reader_id.isalnum():
+        menu_view.display_error_msg(f'Ivalid reader ID: \'{reader_id}\'. Please use numbers and letters only.')
         continue
 
       reader = lending_service.get_reader(reader_id)  # Get the reader, if exists
