@@ -68,10 +68,11 @@ def main():
     if choice == '1':
       title, author, publication_year, genre = insert_new_book()
       if not all([title, author, publication_year, genre]):
-        menu_view.display_error_msg("Book fields are were left empty. Please try again.")
+        menu_view.display_error_msg("Book fields were left empty. Please try again.")
+        continue
 
-        book = library_service.add_book(title, author, publication_year, genre)
-        menu_view.display_success_msg(f"Book '{book.title}' added successfully!") # TODO: notify user if it was already there?
+      book = library_service.add_book(title, author, publication_year, genre)
+      menu_view.display_success_msg(f"Book '{book.title}' added successfully!") # TODO: notify user if it was already there?
 
     elif choice == '2': # TODO: could remove by year or select a book from list
       title = input("Enter title of book to remove: ").strip()
