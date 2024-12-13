@@ -8,6 +8,7 @@ from services.pickle_service import save_to_pickle, load_from_pickle
 from views import library_view, menu_view, system_view
 import datetime
 import constants as const
+import traceback
 
 def input_publication_year():
   """Prompts the user for a publication year until a valid integer is entered."""
@@ -60,10 +61,11 @@ def main():
   reader_service = ReaderService()
 
   file_load = load_from_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service)
-  if file_load is True:
-    system_view.display_system_msg(f"Data loaded from {const.LIBRARY_DATA_FILENAME}")
-  else:
-    system_view.display_system_msg(f"Error: {file_load}")
+  if const.ENVIRONMENT == 'dev':
+    if file_load is True:
+      system_view.display_system_msg(f"Data loaded from {const.LIBRARY_DATA_FILENAME}")
+    else:
+      system_view.display_system_msg(f"Error: {file_load}")
 
   while True:
     try:
@@ -71,7 +73,7 @@ def main():
 
       choice = input("Enter your choice: ").strip()
 
-      if choice == '1':
+      if choice == '1': # Add book
         title, author, publication_year, genre = insert_new_book()
         if not all([title, author, publication_year, genre]):
           menu_view.display_error_msg("Book fields were left empty. Please try again.")
@@ -80,7 +82,7 @@ def main():
         book = library_service.add_book(title, author, publication_year, genre)
         menu_view.display_success_msg(f"Book '{book.title}' added successfully!") # TODO: notify user if it was already there?
 
-      elif choice == '2': # TODO: could remove by year or select a book from list
+      elif choice == '2': # Remove book
         title = input("Enter title of book to remove: ").strip()
         if not title:
           menu_view.display_error_msg("Uable to remove book without a name.")
@@ -92,15 +94,15 @@ def main():
         else:
           menu_view.display_error_msg("Book not found.")
 
-      elif choice == '3':
+      elif choice == '3': # Find book
         query = input("Enter title or author to search: ").strip() # if search is empty -> look for all books
         results = library_service.find_book_by_title_or_author(query)
         library_view.display_search_results(results)
 
-      elif choice == '4':
+      elif choice == '4': # Display all books
         library_view.display_all_books(library_service.books)
 
-      elif choice == '5':
+      elif choice == '5': # Borrow book
         reader_id = input("Enter reader ID: ").strip()
         if not reader_id:
           menu_view.display_error_msg("Reader ID empty is not valid.")
@@ -127,7 +129,7 @@ def main():
         else:
           menu_view.display_error_msg(f"Book {book.title} is unavailable.")
 
-      elif choice == '6':
+      elif choice == '6': # Return book
         reader_id = input("Enter reader ID: ").strip()
 
         if not reader_id or not reader_id.isalnum():
@@ -148,25 +150,26 @@ def main():
         else:
           menu_view.display_error_msg(f"{reader.name} has not borrowed '{book.title}'.")
 
-      elif choice == '7':
+      elif choice == '7': # View overdue books
         overdue_books = lending_service.get_overdue_books()
         library_view.display_overdue_books(overdue_books)  # Use the view function
 
-      elif choice == '8':
+      elif choice == '8': # View borrowed books
         borrowed_books = lending_service.get_borrowed_books()
         library_view.display_borrowed_books(borrowed_books)  # Use the view function
 
-      elif choice == '9':
+      elif choice == '9': # Exit
         file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service)
-        if file_save is True:
-          system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
-        else:
-          system_view.display_system_msg(f"Error: {file_save}")
+        if const.ENVIRONMENT == 'dev':
+          if file_save is True:
+            system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
+          else:
+            system_view.display_system_msg(f"Error: {file_save}")
 
         system_view.display_system_msg("\nExiting Library Management System.")
         break
 
-      elif choice == '10':
+      elif choice == '10': # Add dummy data
         library_service.add_book('Untouched book', 'Mr. B', 2000, 'Fiction')
         library_service.add_book('Banana book', 'Mr. B', 2000, 'Fiction') # borrowed and not due
         library_service.add_book('Banana book2', 'Mr. B', 2010, 'Fiction') # borrowed and overdue
@@ -182,19 +185,40 @@ def main():
         book = library_service.get_book_by_title('Banana book3')
         lending_service.borrow_book(reader, book, datetime.datetime.strptime('2025-01-01', "%Y-%m-%d").date()) # not due
 
+      elif choice == '11': # Create reader card for reader
+        reader_id = input("Enter reader ID: ").strip()
+
+        if not reader_id or not reader_id.isalnum():
+          menu_view.display_error_msg(f'Ivalid reader ID: \'{reader_id}\'. Please use numbers and letters only.')
+          continue
+
+        reader = reader_service.get_reader(reader_id)
+        reader_card_id = reader.get_reader_card()
+        if reader_card_id:
+          menu_view.display_error_msg(f"Reader {reader.name} already have reader card '{reader_card_id}'")
+          continue
+
+        reader_card = reader_service.register_reader_card (reader)
+
+        menu_view.display_success_msg(f"Reader card {reader_card.card_id} created for {reader_card.reader_id}")
 
       else:
         menu_view.display_error_msg("Invalid menu choice. Please try again.")
 
       # save to file on ever menu finish
       file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service)
-      if file_save is True:
-        system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
-      else:
-        system_view.display_system_msg(f"Error: {file_save}")
+      if const.ENVIRONMENT == 'dev':
+        if file_save is True:
+          system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
+        else:
+          system_view.display_system_msg(f"Error: {file_save}")
 
     except Exception as e:
       print(f"An unexpected error occurred: {e}")
+      if const.ENVIRONMENT == 'dev':
+        print(traceback.format_exc())
 
 if __name__ == "__main__":
   main()
+
+

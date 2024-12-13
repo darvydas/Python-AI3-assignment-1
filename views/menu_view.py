@@ -11,6 +11,7 @@ def display_menu():
   print("8. View borrowed books")
   print("9. Exit")
   print("10. Add dummy data")
+  print("11. Create reader card")
 
 def display_success_msg(msg):
   print(f"\nSuccess: {msg}")
