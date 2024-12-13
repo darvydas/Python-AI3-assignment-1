@@ -13,6 +13,13 @@ def display_menu():
   print("10. Add dummy data")
   print("11. Create reader card")
 
+def display_login_menu():
+  """Displays login menu options."""
+  print("\nLibrary Management System")
+  print("1. Librarian login")
+  print("2. Enter Reader card ID")
+  print("3. Register new librarian")
+
 def display_success_msg(msg):
   print(f"\nSuccess: {msg}")
 

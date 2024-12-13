@@ -1,14 +1,17 @@
 # main.py
 
 from models.reader import Reader
+from models.role import Role
 from services.library_service import LibraryService
 from services.lending_service import LendingService
 from services.reader_service import ReaderService
 from services.pickle_service import save_to_pickle, load_from_pickle
+from services.login_service import AuthenticationService
 from views import library_view, menu_view, system_view
 import datetime
 import constants as const
 import traceback
+import getpass
 
 def input_publication_year():
   """Prompts the user for a publication year until a valid integer is entered."""
@@ -55,10 +58,71 @@ def input_due_date():
     except ValueError:
       menu_view.display_error_msg("Invalid date format. Please use YYYY-MM-DD.")
 
+def user_login_input(auth_service:AuthenticationService):
+  while True:
+    menu_view.display_login_menu()
+
+    choice = input("Choose how you want to login: ").strip()
+
+    if choice == '1': # Librarian login: username & password
+      try:
+        username = input("Login username: ")
+        password = getpass.getpass("Enter password: ")
+
+        user = auth_service.authenticate_librarian(username, password)
+        if user:
+          return user
+        else:
+          menu_view.display_error_msg("Invalid username or password.")
+      except ValueError:
+        menu_view.display_error_msg("Invalid input format for librarian login.")
+
+    elif choice == '2': # Reader login: reader_card_id
+      reader_card_input = input("Reader card ID): ")
+      user = auth_service.validate_reader_card(reader_card_input)
+      if user:
+        return user
+      else:
+        menu_view.display_error_msg("Invalid reader card ID.")
+
+    elif choice == '3': # Register new librarian
+      username = input("Enter username: ") # TODO: username should be alnum
+      while True:
+          password = getpass.getpass("Enter password: ")
+          confirm_password = getpass.getpass("Confirm password: ")
+          if password == confirm_password:
+              break
+          else:
+              print("Passwords do not match. Please try again.")
+
+      # while True:
+      #     role_input = input("Enter role (1 for Librarian, 2 for Reader): ")
+      #     if role_input == "1":
+      #         role = Role.LIBRARIAN
+      #         break
+      #     elif role_input == "2":
+      #         role = Role.READER
+      #         break
+      #     else:
+      #         print("Invalid role selection. Please enter 1 or 2.")
+      user = auth_service.register_librarian(username,password) # TODO: finish register
+      if user:
+        menu_view.display_success_msg(f"User {username} registered successfully as {user.role}!")
+        continue
+      else:
+        menu_view.display_error_msg("Register failed.")
+
+
+
+    else:
+      menu_view.display_error_msg("Invalid menu choice. Please try again.")
+
+
 def main():
   library_service = LibraryService()
   lending_service = LendingService()
   reader_service = ReaderService()
+  auth_service = AuthenticationService()
 
   file_load = load_from_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service)
   if const.ENVIRONMENT == 'dev':
@@ -69,6 +133,11 @@ def main():
 
   while True:
     try:
+      logged_in = user_login_input(auth_service)
+      if not logged_in:
+        menu_view.display_error_msg('Failed to login!')
+        continue
+
       menu_view.display_menu()
 
       choice = input("Enter your choice: ").strip()
