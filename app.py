@@ -233,12 +233,12 @@ def main():
 
           menu_view.display_success_msg(f"Reader card {reader.get_reader_card_id()} created for {reader.name}")
 
-        elif choice == '6': # View overdue books #TODO: reader id change to card id
+        elif choice == '6': # View overdue books
           menu_view.display_info_msg("You have chosen 6: View overdue books\n")
           overdue_books = lending_service.get_overdue_books()
           library_view.display_overdue_books(overdue_books)  # Use the view function
 
-        elif choice == '7': # View borrowed books #TODO: reader id change to card id
+        elif choice == '7': # View borrowed books
           menu_view.display_info_msg("You have chosen 7: View borrowed books\n")
           borrowed_books = lending_service.get_borrowed_books()
           library_view.display_borrowed_books(borrowed_books)  # Use the view function
@@ -263,7 +263,7 @@ def main():
           library_service.add_book('Banana book2', 'Mr. B', 2010, 'Fiction') # borrowed and overdue
           library_service.add_book('Banana book3', 'Mr. B', 2010, 'Fiction') # not borrowed because overdue
 
-          reader = reader_service.create_reader_and_card('dreader',"Dummy data")
+          reader = reader_service.create_reader_and_card('rdr',"Dummy data")
 
           book = library_service.get_book_by_title('Banana book')
           lending_service.borrow_book(reader, book, datetime.datetime.strptime('2025-01-01', "%Y-%m-%d").date()) # not due
@@ -292,7 +292,7 @@ def main():
           results = library_service.find_book_by_title_or_author(query)
           library_view.display_search_results(results)
 
-        elif choice == '3': # Borrow book #TODO: Knygas galima pasiimti tik su skaitytoje kortele
+        elif choice == '3': # Borrow book
           menu_view.display_info_msg("You have chosen 3: Borrow book\n")
 
           reader:Reader = reader_service.get_reader_by_reader_card_id(auth_service.logged_in.card_id)
@@ -316,18 +316,10 @@ def main():
           else:
             menu_view.display_error_msg(f"Book {book.title} is unavailable.")
 
-        elif choice == '4': # Return book #TODO: Knygas galima grąžinti tik su skaitytoje kortele
+        elif choice == '4': # Return book
           menu_view.display_info_msg("You have chosen 4: Return book\n")
-          reader_id = input("Enter reader ID: ").strip()
 
-          if not reader_id or not reader_id.isalnum():
-            menu_view.display_error_msg(f'Ivalid reader ID: \'{reader_id}\'. Please use numbers and letters only.')
-            continue
-
-          reader = reader_service.get_reader(reader_id)  # Get the reader, if exists
-
-          if not reader:  # Check if the reader exists
-            menu_view.display_error_msg(f'There is no reader with ID: {reader_id}.')
+          reader:Reader = reader_service.get_reader_by_reader_card_id(auth_service.logged_in.card_id)
 
           book = get_book_by_title_input(library_service)
           if not book:
@@ -338,7 +330,15 @@ def main():
           else:
             menu_view.display_error_msg(f"{reader.name} has not borrowed '{book.title}'.")
 
-        elif choice == '5': # Exit
+        elif choice == '5': # Show my borrowed books
+          menu_view.display_info_msg("You have chosen 5: Show my borrowed books\n")
+
+          reader:Reader = reader_service.get_reader_by_reader_card_id(auth_service.logged_in.card_id)
+
+          borrowed_books = lending_service.get_borrowed_books(reader)
+          library_view.display_borrowed_books(borrowed_books)
+
+        elif choice == '6': # Exit
           menu_view.display_info_msg("You have chosen 5: Exit\n")
           reader_card_nums = reader_service.get_used_reader_card_numbers()
           file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service.books, lending_service.borrowed_books, reader_service.readers, reader_card_nums, reader_service.reader_cards, auth_service.users)

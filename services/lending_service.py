@@ -32,7 +32,7 @@ class LendingService:
       # Remove the book from borrowed_books
       if book in self.borrowed_books:
         self.borrowed_books[book] = [
-          borrow_info for borrow_info in self.borrowed_books[book] if borrow_info['reader_id'] != reader.id
+          borrow_info for borrow_info in self.borrowed_books[book] if borrow_info['card_id'] != reader.get_reader_card_id()
         ]
         if not self.borrowed_books[book]:
           del self.borrowed_books[book]
@@ -58,21 +58,19 @@ class LendingService:
     }
     return overdue_books
 
-  def get_borrowed_books(self):
+  def get_borrowed_books(self, reader:Reader = None):
     ''' Returns borrowed books sorted by first reader due date. '''
-    # borrowed_books = []
-    # for book, borrow_info_list in self.borrowed_books.items():
-    #   for borrow_info in borrow_info_list:
-    #     # Create a copy of the book object to avoid modifying the original
-    #     book_copy = Book(book.title, book.author, book.publication_year, book.genre)
-    #     book_copy.due_date = borrow_info['due_date']  # Add the due_date attribute to the copy
-    #     borrowed_books.append(book_copy)
+    if reader:
+      borrowed_books = {}
+      for book, borrow_info_list in self.borrowed_books.items():
+        for borrow_info in borrow_info_list:
+          if borrow_info['card_id'] == reader.get_reader_card_id():
+            borrowed_books[book] = []
+            borrowed_books[book].append(borrow_info)
 
-    # # Sort by due_date
-    # borrowed_books.sort(key=lambda x: x.due_date)
-    # return borrowed_books
-    # print( list(sorted(self.borrowed_books.items(), key=lambda item: item[1][0]['due_date'])) )
-    return dict(sorted(self.borrowed_books.items(), key=lambda item: item[1][0]['due_date'])) #TODO: could sort by all reader due_date first
+      return dict(sorted(borrowed_books.items(), key=lambda item: item[1][0]['due_date']))
+    else:
+      return dict(sorted(self.borrowed_books.items(), key=lambda item: item[1][0]['due_date'])) #TODO: could sort by all reader due_date first
 
   def check_overdue_status(self, reader:Reader):
       overdue_books = self.get_overdue_books()
@@ -91,6 +89,6 @@ class LendingService:
       if book in reader.borrowed_books:
         reader_overdue_books[book] = []
         for borrow_info in borrow_info_list:
-          if borrow_info['reader_id'] == reader.id:
+          if borrow_info['card_id'] == reader.id:
             reader_overdue_books[book].append(borrow_info)
     return reader_overdue_books if reader_overdue_books else None

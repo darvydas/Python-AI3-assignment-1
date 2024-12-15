@@ -18,7 +18,8 @@ def display_reader_menu():
   print("2. Find book")
   print("3. Borrow book")
   print("4. Return book")
-  print("5. Exit")
+  print("5. Show my borrowed books")
+  print("6. Exit")
 
 def display_login_menu():
   """Displays login menu options."""
