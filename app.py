@@ -294,12 +294,8 @@ def main():
 
         elif choice == '3': # Borrow book #TODO: Knygas galima pasiimti tik su skaitytoje kortele
           menu_view.display_info_msg("You have chosen 3: Borrow book\n")
-          reader_id = input("Enter reader ID: ").strip()
-          if not reader_id:
-            menu_view.display_error_msg("Reader ID empty is not valid.")
-            continue
 
-          reader:Reader = reader_service.get_or_create_reader(reader_id)
+          reader:Reader = reader_service.get_reader_by_reader_card_id(auth_service.logged_in.card_id)
           if lending_service.check_overdue_status(reader):
             menu_view.display_error_msg(f"Reader {reader.name} has overdue books and cannot borrow more.")
             overdue_books = lending_service.get_reader_overdue_books(reader)

@@ -52,3 +52,7 @@ class ReaderService:
         if reader.get_reader_card_id() == card_id:
           return reader
     return False
+
+  def get_reader_by_reader_card_id(self, reader_card_id):
+    reader_card:ReaderCard = self.reader_cards[reader_card_id]
+    return self.readers[reader_card.reader_id]

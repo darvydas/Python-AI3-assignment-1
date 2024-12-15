@@ -18,7 +18,7 @@ class LendingService:
       # Store book title, due date, and reader ID
       if book.title not in self.borrowed_books:
         self.borrowed_books[book] = []
-      self.borrowed_books[book].append({'due_date': due_date, 'reader_id': reader.id})
+      self.borrowed_books[book].append({'due_date': due_date, 'card_id': reader.get_reader_card_id()})
 
       return True # Book is borrowed
     else:
