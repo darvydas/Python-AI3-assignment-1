@@ -88,6 +88,7 @@ def user_login_input(auth_service:AuthenticationService):
     choice = input("Choose how you want to login: ").strip()
 
     if choice == '1': # Librarian login: username & password
+      menu_view.display_info_msg("You have chosen 1: Librarian login\n")
       try:
         username = input_username()
         password = input_password()
@@ -101,7 +102,8 @@ def user_login_input(auth_service:AuthenticationService):
         menu_view.display_error_msg("Invalid input format for librarian login.")
 
     elif choice == '2': # Reader login: reader_card_id
-      reader_card_input = input("Reader card ID): ")
+      menu_view.display_info_msg("You have chosen 2: Reader card ID\n")
+      reader_card_input = input("Enter your card ID): ") #TODO: finish checking valid reader card
       user = auth_service.validate_reader_card(reader_card_input)
       if user:
         return user
@@ -109,6 +111,7 @@ def user_login_input(auth_service:AuthenticationService):
         menu_view.display_error_msg("Invalid reader card ID.")
 
     elif choice == '3': # Register new librarian
+      menu_view.display_info_msg("You have chosen 3: Register new librarian\n")
       username = input_username()
       password = input_password(need_confirm=True)
       # while True:
@@ -123,7 +126,7 @@ def user_login_input(auth_service:AuthenticationService):
       #         print("Invalid role selection. Please enter 1 or 2.")
       user = auth_service.register_librarian(username,password) # TODO: finish register
       if user:
-        menu_view.display_success_msg(f"User {username} registered successfully as {user.role}!")
+        menu_view.display_success_msg(f"User {username} registered successfully as {user.role.value}!")
         continue
       else:
         menu_view.display_error_msg("Register failed.")
@@ -140,7 +143,7 @@ def main():
   reader_service = ReaderService()
   auth_service = AuthenticationService()
 
-  file_load = load_from_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service)
+  file_load = load_from_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service, auth_service)
   if const.ENVIRONMENT == 'dev':
     if file_load is True:
       system_view.display_system_msg(f"Data loaded from {const.LIBRARY_DATA_FILENAME}")
@@ -153,8 +156,10 @@ def main():
       if not logged_in:
         menu_view.display_error_msg('Failed to login!')
         continue
+      else:
+        menu_view.display_success_msg(f'You are logged in as: {logged_in.username}')
 
-      menu_view.display_menu()
+      menu_view.display_menu() # TODO: Skaitytojas negali pridėti/išimti knygų
 
       choice = input("Enter your choice: ").strip()
 
@@ -187,7 +192,7 @@ def main():
       elif choice == '4': # Display all books
         library_view.display_all_books(library_service.books)
 
-      elif choice == '5': # Borrow book
+      elif choice == '5': # Borrow book #TODO: Knygas galima pasiimti tik su skaitytoje kortele
         reader_id = input("Enter reader ID: ").strip()
         if not reader_id:
           menu_view.display_error_msg("Reader ID empty is not valid.")
@@ -214,7 +219,7 @@ def main():
         else:
           menu_view.display_error_msg(f"Book {book.title} is unavailable.")
 
-      elif choice == '6': # Return book
+      elif choice == '6': # Return book #TODO: Knygas galima grąžinti tik su skaitytoje kortele
         reader_id = input("Enter reader ID: ").strip()
 
         if not reader_id or not reader_id.isalnum():
@@ -244,7 +249,7 @@ def main():
         library_view.display_borrowed_books(borrowed_books)  # Use the view function
 
       elif choice == '9': # Exit
-        file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service)
+        file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service, auth_service)
         if const.ENVIRONMENT == 'dev':
           if file_save is True:
             system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
@@ -291,7 +296,7 @@ def main():
         menu_view.display_error_msg("Invalid menu choice. Please try again.")
 
       # save to file on ever menu finish
-      file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service)
+      file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service, auth_service)
       if const.ENVIRONMENT == 'dev':
         if file_save is True:
           system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")

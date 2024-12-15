@@ -17,7 +17,7 @@ def display_login_menu():
   """Displays login menu options."""
   print("\nLibrary Management System")
   print("1. Librarian login")
-  print("2. Enter Reader card ID")
+  print("2. Reader card ID")
   print("3. Register new librarian")
 
 def display_success_msg(msg):
@@ -26,3 +26,5 @@ def display_success_msg(msg):
 def display_error_msg(msg):
   print(f"\nError: {msg}")
 
+def display_info_msg(msg):
+  print(f"\nInfo: {msg}")
