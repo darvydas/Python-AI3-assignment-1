@@ -1,4 +1,4 @@
-def display_menu():
+def display_librarian_menu():
   """Displays the main menu options."""
   print("\nLibrary Management System")
   print("1. Add book")
@@ -12,6 +12,15 @@ def display_menu():
   print("9. Exit")
   print("10. Add dummy data")
   print("11. Create reader card")
+
+def display_reader_menu():
+  """Displays the main menu options."""
+  print("\nLibrary Management System")
+  print("1. Display all books")
+  print("2. Find book")
+  print("3. Borrow book")
+  print("4. Return book")
+  print("5. Exit")
 
 def display_login_menu():
   """Displays login menu options."""

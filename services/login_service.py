@@ -25,7 +25,7 @@ class AuthenticationService:
   def register_librarian(self, username_input, password_input):
     password_hash = self.generate_password_hash(password_input)
     user = User(Role.LIBRARIAN, username_input, password_hash)
-    self.users[username_input] = user # TODO: should save to file
+    self.users[username_input] = user
     return user
 
   def validate_reader_card(self, card_id):
@@ -33,4 +33,6 @@ class AuthenticationService:
         return User(Role.READER, "", card_id=card_id)
     return False
 
+  def is_logged_in_user_librarian(self):
+    return self.logged_in.role is Role.LIBRARIAN
 

@@ -8,7 +8,7 @@ class Reader:
     def __str__(self):
         return f"Reader ID: {self.id}\nName: {self.name}\nCard ID: {self._card_id}\nBorrowed books: {', '.join([book.title for book in self.borrowed_books]) if self.borrowed_books else 'None'}"
 
-    def get_reader_card(self):
+    def get_reader_card_id(self):
         return self._card_id if self._card_id else None
 
     def set_reader_card(self, reader_card_id):

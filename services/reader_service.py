@@ -8,14 +8,17 @@ class ReaderService:
     self.__reader_card_nums = reader_card_nums  # unique card numbers
     self.reader_cards = reader_cards
 
-  def get_or_create_reader(self, reader_id, reader_name="Unknown"):
+  def create_reader_and_card(self, reader_id, reader_name="Unknown"):
     """
     Gets an existing reader or creates a new one if not found.
     Returns: A Reader object.
     """
     if reader_id not in self.readers:
-      self.readers[reader_id] = Reader(reader_name, reader_id)
-    return self.readers[reader_id]
+      new_reader = Reader(reader_name, reader_id)
+      self.register_reader_card(new_reader)
+      self.readers[reader_id] = new_reader
+      return new_reader
+    return None
 
   def get_reader(self, reader_id):
     """
