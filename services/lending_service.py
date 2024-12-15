@@ -4,8 +4,8 @@ from models.book import Book
 from models.reader import Reader
 
 class LendingService:
-  def __init__(self):
-    self.borrowed_books = {}  # Dictionary to store borrowed books
+  def __init__(self, borrowed_books = {}):
+    self.borrowed_books = borrowed_books  # Dictionary to store borrowed books
 
   def borrow_book(self, reader:Reader, book:Book, due_date):
     if book.is_available():

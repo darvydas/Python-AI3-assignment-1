@@ -77,6 +77,7 @@ def input_password(need_confirm = False):
         return password
       else:
         menu_view.display_error_msg("Passwords do not match. Please try again.")
+        continue
 
     return password
 
@@ -138,26 +139,37 @@ def user_login_input(auth_service:AuthenticationService):
 
 
 def main():
-  library_service = LibraryService()
-  lending_service = LendingService()
-  reader_service = ReaderService()
-  auth_service = AuthenticationService()
 
-  file_load = load_from_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service, auth_service)
-  if const.ENVIRONMENT == 'dev':
-    if file_load is True:
+  file_load, file_data = load_from_pickle(const.LIBRARY_DATA_FILENAME)
+
+  if file_load is True:
+    library_service = LibraryService(file_data['books'])
+    lending_service = LendingService(file_data['borrowed_books'])
+    reader_service = ReaderService(file_data['readers'], file_data['reader_card_nums'], file_data['reader_cards'])
+    auth_service = AuthenticationService(file_data['users'])
+    if const.ENVIRONMENT == 'dev':
       system_view.display_system_msg(f"Data loaded from {const.LIBRARY_DATA_FILENAME}")
-    else:
-      system_view.display_system_msg(f"Error: {file_load}")
+  else:
+    if const.ENVIRONMENT == 'dev':
+      system_view.display_system_msg(f"Error: {file_data}")
+    library_service = LibraryService()
+    lending_service = LendingService()
+    reader_service = ReaderService()
+    auth_service = AuthenticationService()
+
 
   while True:
     try:
-      logged_in = user_login_input(auth_service)
-      if not logged_in:
-        menu_view.display_error_msg('Failed to login!')
-        continue
+      if not auth_service.logged_in:
+        user_login_input(auth_service)
+
+        if not auth_service.logged_in:
+          menu_view.display_error_msg('Failed to login!')
+          continue
+        else:
+          menu_view.display_success_msg(f'You are logged in as: {auth_service.logged_in.username}')
       else:
-        menu_view.display_success_msg(f'You are logged in as: {logged_in.username}')
+        menu_view.display_info_msg(f'You are logged in as: {auth_service.logged_in.username}')
 
       menu_view.display_menu() # TODO: Skaitytojas negali pridėti/išimti knygų
 
@@ -249,7 +261,8 @@ def main():
         library_view.display_borrowed_books(borrowed_books)  # Use the view function
 
       elif choice == '9': # Exit
-        file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service, auth_service)
+        reader_card_nums = reader_service.get_used_reader_card_numbers()
+        file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service.books, lending_service.borrowed_books, reader_service.readers, reader_card_nums, reader_service.reader_cards, auth_service.users)
         if const.ENVIRONMENT == 'dev':
           if file_save is True:
             system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
@@ -295,8 +308,9 @@ def main():
       else:
         menu_view.display_error_msg("Invalid menu choice. Please try again.")
 
-      # save to file on ever menu finish
-      file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service, lending_service, reader_service, auth_service)
+      # save to file on every menu finish
+      reader_card_nums = reader_service.get_used_reader_card_numbers()
+      file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service.books, lending_service.borrowed_books, reader_service.readers, reader_card_nums, reader_service.reader_cards, auth_service.users)
       if const.ENVIRONMENT == 'dev':
         if file_save is True:
           system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")

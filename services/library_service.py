@@ -1,8 +1,8 @@
 from models.book import Book
 
 class LibraryService:
-  def __init__(self):
-    self.books:list[Book] = []
+  def __init__(self, books = []):
+    self.books:list[Book] = books
 
   def add_book(self, title, author, publication_year, genre):
     """Adds a new book or increases the available count if it already exists."""

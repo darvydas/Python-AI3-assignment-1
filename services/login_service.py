@@ -4,8 +4,8 @@ import constants as const
 import hashlib
 
 class AuthenticationService:
-  def __init__(self) -> None:
-    self.users:list[User] = {} #{'username':{username:str, password: str, card_id: str, role: Role}}
+  def __init__(self, users = {}) -> None:
+    self.users:dict[User] = users #{'username':{username:str, password: str, card_id: str, role: Role}}
     self.logged_in = {}
 
   def generate_password_hash(self, pass_input:str) -> str:

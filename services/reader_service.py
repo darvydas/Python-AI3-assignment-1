@@ -3,11 +3,10 @@ from models.readerCard import ReaderCard
 import random
 
 class ReaderService:
-  def __init__(self):
-    self.readers = {}  # Dictionary to store readers by their ID
-    # TODO: save reader cards to file
-    self.__reader_card_nums = []  # unique card numbers
-    self.reader_cards = {}
+  def __init__(self, readers = {}, reader_card_nums = [], reader_cards = {}):
+    self.readers = readers  # Dictionary to store readers by their ID
+    self.__reader_card_nums = reader_card_nums  # unique card numbers
+    self.reader_cards = reader_cards
 
   def get_or_create_reader(self, reader_id, reader_name="Unknown"):
     """
@@ -40,3 +39,6 @@ class ReaderService:
     # save all reader cards
     self.reader_cards[new_card_id] = reader_card
     return reader_card
+
+  def get_used_reader_card_numbers(self):
+    return self.__reader_card_nums
