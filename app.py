@@ -58,6 +58,29 @@ def input_due_date():
     except ValueError:
       menu_view.display_error_msg("Invalid date format. Please use YYYY-MM-DD.")
 
+def input_username():
+  while True:
+    username = input("Enter username: ").strip()
+
+    if username.isalnum():
+      return username
+    else:
+      menu_view.display_error_msg('Username should use letters and numbers only!')
+
+def input_password(need_confirm = False):
+  while True:
+    password = getpass.getpass("Enter password: ").strip()
+
+    if need_confirm:
+      confirm_password = getpass.getpass("Confirm password: ")
+      if password == confirm_password:
+        return password
+      else:
+        menu_view.display_error_msg("Passwords do not match. Please try again.")
+
+    return password
+
+
 def user_login_input(auth_service:AuthenticationService):
   while True:
     menu_view.display_login_menu()
@@ -66,8 +89,8 @@ def user_login_input(auth_service:AuthenticationService):
 
     if choice == '1': # Librarian login: username & password
       try:
-        username = input("Login username: ")
-        password = getpass.getpass("Enter password: ")
+        username = input_username()
+        password = input_password()
 
         user = auth_service.authenticate_librarian(username, password)
         if user:
@@ -86,15 +109,8 @@ def user_login_input(auth_service:AuthenticationService):
         menu_view.display_error_msg("Invalid reader card ID.")
 
     elif choice == '3': # Register new librarian
-      username = input("Enter username: ") # TODO: username should be alnum
-      while True:
-          password = getpass.getpass("Enter password: ")
-          confirm_password = getpass.getpass("Confirm password: ")
-          if password == confirm_password:
-              break
-          else:
-              print("Passwords do not match. Please try again.")
-
+      username = input_username()
+      password = input_password(need_confirm=True)
       # while True:
       #     role_input = input("Enter role (1 for Librarian, 2 for Reader): ")
       #     if role_input == "1":
