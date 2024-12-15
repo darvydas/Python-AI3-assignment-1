@@ -1,7 +1,6 @@
 # main.py
 
 from models.reader import Reader
-from models.role import Role
 from services.library_service import LibraryService
 from services.lending_service import LendingService
 from services.reader_service import ReaderService
@@ -82,7 +81,7 @@ def input_password(need_confirm = False):
     return password
 
 
-def user_login_input(auth_service:AuthenticationService):
+def user_login_input(auth_service:AuthenticationService, reader_service:ReaderService):
   while True:
     menu_view.display_login_menu()
 
@@ -104,10 +103,15 @@ def user_login_input(auth_service:AuthenticationService):
 
     elif choice == '2': # Reader login: reader_card_id
       menu_view.display_info_msg("You have chosen 2: Reader card ID\n")
-      reader_card_input = input("Enter your card ID): ") #TODO: finish checking valid reader card
-      user = auth_service.validate_reader_card(reader_card_input)
-      if user:
-        return user
+      reader_card_input = input("Enter your card ID): ").strip()
+
+      reader = reader_service.validate_reader_card(reader_card_input)
+      if reader:
+        user = auth_service.authenticate_reader(reader)
+        if user:
+          return user
+        else:
+          menu_view.display_error_msg("Reader authentication failed.")
       else:
         menu_view.display_error_msg("Invalid reader card ID.")
 
@@ -161,7 +165,7 @@ def main():
   while True:
     try:
       if not auth_service.logged_in:
-        user_login_input(auth_service)
+        user_login_input(auth_service, reader_service)
 
         if not auth_service.logged_in:
           menu_view.display_error_msg('Failed to login!')
@@ -295,12 +299,15 @@ def main():
             menu_view.display_error_msg(f'Ivalid reader ID: \'{reader_id}\'. Please use numbers and letters only.')
             continue
 
+          if reader_service.get_reader(reader_id):
+            menu_view.display_error_msg(f'Ivalid reader ID: \'{reader_id}\'. Reader already exist.')
+            continue
+
           reader_name = input("Enter reader name: ").strip()
 
           reader:Reader = reader_service.create_reader_and_card(reader_id, reader_name)
-          if not reader:
-            menu_view.display_error_msg(f"Reader {reader} already exist.")
-            continue
+
+          auth_service.register_reader(reader)
 
           menu_view.display_success_msg(f"Reader card {reader.get_reader_card_id()} created for {reader.name}")
 

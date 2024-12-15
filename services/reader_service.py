@@ -4,7 +4,7 @@ import random
 
 class ReaderService:
   def __init__(self, readers = {}, reader_card_nums = [], reader_cards = {}):
-    self.readers = readers  # Dictionary to store readers by their ID
+    self.readers:dict[Reader] = readers  # Dictionary to store readers by their ID
     self.__reader_card_nums = reader_card_nums  # unique card numbers
     self.reader_cards = reader_cards
 
@@ -45,3 +45,10 @@ class ReaderService:
 
   def get_used_reader_card_numbers(self):
     return self.__reader_card_nums
+
+  def validate_reader_card(self, card_id):
+    if card_id in self.reader_cards: # TODO: unfinished validation
+      for _, reader in self.readers.items():
+        if reader.get_reader_card_id() == card_id:
+          return reader
+    return False

@@ -1,7 +1,9 @@
 from models.user import User
 from models.role import Role
+from models.reader import Reader
 import constants as const
 import hashlib
+from services.reader_service import ReaderService
 
 class AuthenticationService:
   def __init__(self, users = {}) -> None:
@@ -28,9 +30,18 @@ class AuthenticationService:
     self.users[username_input] = user
     return user
 
-  def validate_reader_card(self, card_id):
-    if card_id: # TODO: unfinished validation
-        return User(Role.READER, "", card_id=card_id)
+  def register_reader(self, reader:Reader):
+    reader_card_id = reader.get_reader_card_id()
+    user = User(Role.READER, reader.id, card_id=reader_card_id)
+    self.users[reader_card_id] = user
+    return user
+
+  def authenticate_reader(self, reader:Reader):
+    user:User = self.users.get(reader.get_reader_card_id())
+
+    if user and user.role == Role.READER:
+      self.logged_in = user
+      return user
     return False
 
   def is_logged_in_user_librarian(self):

@@ -1,6 +1,6 @@
 from models.role import Role
 class User:
-  def __init__(self, role, username, password_hash = "", card_id = "") -> None:
+  def __init__(self, role, username, password_hash = None, card_id = "") -> None:
     self.role:Role = role
     self.username = username
     self.password = password_hash
