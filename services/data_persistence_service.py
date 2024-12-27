@@ -148,7 +148,7 @@ def load_from_sqlite():
           if book:
             if book not in borrowed_books:
               borrowed_books[book] = []
-            borrowed_books[book].append({'due_date': datetime.strptime(due_date, "%Y-%m-%d"), 'card_id': reader_id})
+            borrowed_books[book].append({'due_date': datetime.strptime(due_date, "%Y-%m-%d").date(), 'card_id': reader_id})
           else:
             pass
             # TODO: return error if failed to find borrowed book in book list
