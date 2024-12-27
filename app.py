@@ -4,7 +4,7 @@ from models.reader import Reader
 from services.library_service import LibraryService
 from services.lending_service import LendingService
 from services.reader_service import ReaderService
-from services.pickle_service import save_to_pickle, load_from_pickle
+from services.data_persistance_service import save_data, load_data
 from services.login_service import AuthenticationService
 from views import library_view, menu_view, system_view
 import datetime
@@ -144,7 +144,7 @@ def user_login_input(auth_service:AuthenticationService, reader_service:ReaderSe
 
 def main():
 
-  file_load, file_data = load_from_pickle(const.LIBRARY_DATA_FILENAME)
+  file_load, file_data = load_data()
 
   if file_load is True:
     library_service = LibraryService(file_data['books'])
@@ -152,7 +152,7 @@ def main():
     reader_service = ReaderService(file_data['readers'], file_data['reader_card_nums'], file_data['reader_cards'])
     auth_service = AuthenticationService(file_data['users'])
     if const.ENVIRONMENT == 'dev':
-      system_view.display_system_msg(f"Data loaded from {const.LIBRARY_DATA_FILENAME}")
+      system_view.display_system_msg(f"Data loaded")
   else:
     if const.ENVIRONMENT == 'dev':
       system_view.display_system_msg(f"Error: {file_data}")
@@ -246,7 +246,7 @@ def main():
         elif choice == '8': # Exit
           menu_view.display_info_msg("You have chosen 8: Exit\n")
           reader_card_nums = reader_service.get_used_reader_card_numbers()
-          file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service.books, lending_service.borrowed_books, reader_service.readers, reader_card_nums, reader_service.reader_cards, auth_service.users)
+          file_save = save_data(library_service.books, lending_service.borrowed_books, reader_service.readers, reader_card_nums, reader_service.reader_cards, auth_service.users)
           if const.ENVIRONMENT == 'dev':
             if file_save is True:
               system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
@@ -342,7 +342,7 @@ def main():
         elif choice == '6': # Exit
           menu_view.display_info_msg("You have chosen 5: Exit\n")
           reader_card_nums = reader_service.get_used_reader_card_numbers()
-          file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service.books, lending_service.borrowed_books, reader_service.readers, reader_card_nums, reader_service.reader_cards, auth_service.users)
+          file_save = save_data(library_service.books, lending_service.borrowed_books, reader_service.readers, reader_card_nums, reader_service.reader_cards, auth_service.users)
           if const.ENVIRONMENT == 'dev':
             if file_save is True:
               system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
@@ -358,7 +358,7 @@ def main():
 
       # save to file on every menu finish
       reader_card_nums = reader_service.get_used_reader_card_numbers()
-      file_save = save_to_pickle(const.LIBRARY_DATA_FILENAME, library_service.books, lending_service.borrowed_books, reader_service.readers, reader_card_nums, reader_service.reader_cards, auth_service.users)
+      file_save = save_data(library_service.books, lending_service.borrowed_books, reader_service.readers, reader_card_nums, reader_service.reader_cards, auth_service.users)
       if const.ENVIRONMENT == 'dev':
         if file_save is True:
           system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
