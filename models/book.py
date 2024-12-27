@@ -1,10 +1,10 @@
 class Book:
-    def __init__(self, title, author, publication_year, genre):
+    def __init__(self, title, author, publication_year, genre, available=1):
         self.title = title
         self.author = author
         self.publication_year = publication_year
         self.genre = genre
-        self._available = 1
+        self._available = available
 
     def increase_available(self, quantity=1):
         self._available += quantity
