@@ -35,7 +35,7 @@ class ReaderService:
         return str(random_number)
 
   def register_reader_card(self, reader:Reader):
-    new_card_id = str(reader.id) + self.__generate_unique_card_number()
+    new_card_id = str(reader.id) + '_' + self.__generate_unique_card_number()
 
     reader_card = ReaderCard(new_card_id, reader.id)
     reader.set_reader_card(new_card_id)

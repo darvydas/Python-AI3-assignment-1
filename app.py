@@ -264,6 +264,7 @@ def main():
           library_service.add_book('Banana book3', 'Mr. B', 2010, 'Fiction') # not borrowed because overdue
 
           reader = reader_service.create_reader_and_card('rdr',"Dummy data")
+          auth_service.register_reader(reader)
 
           book = library_service.get_book_by_title('Banana book')
           lending_service.borrow_book(reader, book, datetime.datetime.strptime('2025-01-01', "%Y-%m-%d").date()) # not due

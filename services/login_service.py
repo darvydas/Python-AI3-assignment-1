@@ -37,7 +37,7 @@ class AuthenticationService:
     return user
 
   def authenticate_reader(self, reader:Reader):
-    user:User = self.users.get(reader.get_reader_card_id())
+    user:User = self.users.get(reader.id)
 
     if user and user.role == Role.READER:
       self.logged_in = user
@@ -45,5 +45,5 @@ class AuthenticationService:
     return False
 
   def is_logged_in_user_librarian(self):
-    return self.logged_in.role is Role.LIBRARIAN
+    return self.logged_in and self.logged_in.role is Role.LIBRARIAN
 
