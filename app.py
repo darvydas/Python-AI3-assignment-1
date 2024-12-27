@@ -4,7 +4,7 @@ from models.reader import Reader
 from services.library_service import LibraryService
 from services.lending_service import LendingService
 from services.reader_service import ReaderService
-from services.data_persistance_service import save_data, load_data
+from services.data_persistence_service import save_data, load_data
 from services.login_service import AuthenticationService
 from views import library_view, menu_view, system_view
 import datetime
@@ -152,7 +152,7 @@ def main():
     reader_service = ReaderService(file_data['readers'], file_data['reader_card_nums'], file_data['reader_cards'])
     auth_service = AuthenticationService(file_data['users'])
     if const.ENVIRONMENT == 'dev':
-      system_view.display_system_msg(f"Data loaded")
+      system_view.display_system_msg(f"Data loaded from {const.PERSISTENCE_METHOD}")
   else:
     if const.ENVIRONMENT == 'dev':
       system_view.display_system_msg(f"Error: {file_data}")
@@ -249,7 +249,7 @@ def main():
           file_save = save_data(library_service.books, lending_service.borrowed_books, reader_service.readers, reader_card_nums, reader_service.reader_cards, auth_service.users)
           if const.ENVIRONMENT == 'dev':
             if file_save is True:
-              system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
+              system_view.display_system_msg(f"Data saved to {const.PERSISTENCE_METHOD}")
             else:
               system_view.display_system_msg(f"Error: {file_save}")
 
@@ -345,7 +345,7 @@ def main():
           file_save = save_data(library_service.books, lending_service.borrowed_books, reader_service.readers, reader_card_nums, reader_service.reader_cards, auth_service.users)
           if const.ENVIRONMENT == 'dev':
             if file_save is True:
-              system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
+              system_view.display_system_msg(f"Data saved to {const.PERSISTENCE_METHOD}")
             else:
               system_view.display_system_msg(f"Error: {file_save}")
 
@@ -361,7 +361,7 @@ def main():
       file_save = save_data(library_service.books, lending_service.borrowed_books, reader_service.readers, reader_card_nums, reader_service.reader_cards, auth_service.users)
       if const.ENVIRONMENT == 'dev':
         if file_save is True:
-          system_view.display_system_msg(f"Data saved to {const.LIBRARY_DATA_FILENAME}")
+          system_view.display_system_msg(f"Data saved to {const.PERSISTENCE_METHOD}")
         else:
           system_view.display_system_msg(f"Error: {file_save}")
 
