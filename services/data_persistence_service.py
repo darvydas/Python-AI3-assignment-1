@@ -90,39 +90,48 @@ def initialize_sqlite():
   return conn
 
 def save_to_sqlite(books, borrowed_books, readers, reader_card_nums, reader_cards, users):
-  conn = sqlite3.connect(SQLITE_FILENAME)
-  # save books to sqlite books table
-  cursor = conn.cursor()
-  for book in books: # [Book(title, author, publication_year, genre, _available)]
-    cursor.execute("INSERT OR REPLACE INTO books (title, author, publication_year, genre, available) VALUES (?, ?, ?, ?, ?)", (book.title, book.author, book.publication_year, book.genre, book._available))
-  conn.commit()
+  try:
+    conn = sqlite3.connect(SQLITE_FILENAME)
 
-  # save borrowed_books to sqlite borrowed_books table
-  for book, borrow_info_list in borrowed_books.items():
-    for borrow_info in borrow_info_list:
-      cursor.execute("INSERT OR REPLACE INTO borrowed_books (book_title, due_date, reader_id) VALUES (?, ?, ?)",
-                     (book.title, datetime.strftime(borrow_info['due_date'], "%Y-%m-%d"), borrow_info['card_id']))
-  conn.commit()
+    cursor = conn.cursor()
 
-  # save readers to sqlite readers table
-  for reader_id, reader in readers.items():
-    cursor.execute("INSERT OR REPLACE INTO readers (id, name, card_id) VALUES (?, ?, ?)", (reader.id, reader.name, reader.get_reader_card_id()))
-  conn.commit()
+    cursor.execute("DELETE FROM books")
+    # save books to sqlite books table
+    for book in books: # [Book(title, author, publication_year, genre, _available)]
+      cursor.execute("INSERT INTO books (title, author, publication_year, genre, available) VALUES (?, ?, ?, ?, ?)", (book.title, book.author, book.publication_year, book.genre, book._available))
 
-  # save reader_cards to sqlite reader_cards table
-  for card_id, reader_card in reader_cards.items():
-    cursor.execute("INSERT OR REPLACE INTO reader_cards (id, reader_id, issue_date, card_id) VALUES (?, ?, ?, ?)",
-                   (reader_card.card_id.split('_')[1], # save reader_card_num
-                    reader_card.reader_id, reader_card.issue_date, reader_card.card_id))
-  conn.commit()
+    cursor.execute("DELETE FROM borrowed_books")
+    # save borrowed_books to sqlite borrowed_books table
+    for book, borrow_info_list in borrowed_books.items():
+      for borrow_info in borrow_info_list:
+        cursor.execute("INSERT INTO borrowed_books (book_title, due_date, reader_id) VALUES (?, ?, ?)",
+              (book.title, datetime.strftime(borrow_info['due_date'], "%Y-%m-%d"), borrow_info['card_id']))
 
-  # save into users
-  for username, user in users.items():
-    cursor.execute("INSERT OR REPLACE INTO users (username, password, role, card_id) VALUES (?, ?, ?, ?)", (user.username, user.password, user.role.value, user.card_id))
-  conn.commit()
+    cursor.execute("DELETE FROM readers")
+    # save readers to sqlite readers table
+    for reader_id, reader in readers.items():
+      cursor.execute("INSERT INTO readers (id, name, card_id) VALUES (?, ?, ?)",
+                     (reader.id, reader.name, reader.get_reader_card_id()))
 
-  conn.close()
-  return True
+    cursor.execute("DELETE FROM reader_cards")
+    # save reader_cards to sqlite reader_cards table
+    for card_id, reader_card in reader_cards.items():
+      cursor.execute("INSERT INTO reader_cards (id, reader_id, issue_date, card_id) VALUES (?, ?, ?, ?)",
+                      (reader_card.card_id.split('_')[1], # save reader_card_num
+                      reader_card.reader_id, reader_card.issue_date, reader_card.card_id))
+
+    cursor.execute("DELETE FROM users")
+    # save into users
+    for username, user in users.items():
+      cursor.execute("INSERT INTO users (username, password, role, card_id) VALUES (?, ?, ?, ?)", (user.username, user.password, user.role.value, user.card_id))
+    conn.commit()
+    conn.close()
+    return True
+  except sqlite3.Error as e:
+    conn.rollback() # Revert all changes
+    conn.close()
+    return f"Error: {e}. Rolling back changes."
+
 
 
 def load_from_sqlite():
